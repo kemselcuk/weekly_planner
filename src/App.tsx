@@ -14,6 +14,7 @@ import AboutUs from './pages/AboutUs';
 import UserInfo from './pages/UserInfo'; // Ensure correct path to UserInfo component
 import Login from './components/Login'; // If you have a login page
 import SignIn from './pages/SignIn'; // If you have a sign-in page
+import MeetingsPage  from './pages/MeetingsPage';
 
 function AppContent() {
   const { isDarkMode } = useTheme();
@@ -141,7 +142,7 @@ function AppContent() {
   return (
     <div className={`min-h-screen ${
       isDarkMode 
-        ? 'bg-gradient-to-b from-purple-900 to-gray-900 text-gray-100' 
+        ? 'bg-slate-950 text-gray-100' 
         : 'bg-gradient-to-b from-purple-50 to-white text-gray-900'
     }`}>
       <Header />
@@ -162,6 +163,7 @@ function AppContent() {
                   />
                 } 
               />
+              <Route path="/meetings" element={<MeetingsPage />} />
               <Route path="/monthly-planner" element={<MonthlyPlanner />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/about-us" element={<AboutUs />} />
