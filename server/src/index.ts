@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import notesRouter from './routes/notes';
 import usersRouter from './routes/users';
+import meetingRoutes from './routes/meetings'; // Import the meetings route
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(express.json()); // Parse JSON requests
 // Routes
 app.use('/api/notes', notesRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/meetings', meetingRoutes); // Use the meetings route
 
 // Database Connection and Server Start
 const startServer = async () => {

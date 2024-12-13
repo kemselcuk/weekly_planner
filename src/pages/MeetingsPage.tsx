@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Meeting } from '../types/meeting';
 import { MeetingCard } from '../components/meetings/MeetingCard';
 import { AddMeetingModal } from '../components/meetings/AddMeetingModal';
@@ -9,7 +9,23 @@ export const MeetingsPage: React.FC = () => {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [isAddMeetingOpen, setIsAddMeetingOpen] = useState(false);
 
-  const handleAddMeeting = (meetingData: {
+  useEffect(() => {
+    const fetchMeetings = async () => {
+      const res = await fetch('http://localhost:5000/api/meetings', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMeetings(data);
+      }
+    };
+
+    fetchMeetings();
+  }, []);
+
+  const handleAddMeeting = async (meetingData: {
     title: string;
     time: string;
     date: string;
@@ -17,17 +33,33 @@ export const MeetingsPage: React.FC = () => {
     participants: string[];
     description?: string;
   }) => {
-    setMeetings(current => [
-      ...current,
-      {
-        id: crypto.randomUUID(),
-        ...meetingData,
+    const res = await fetch('http://localhost:5000/api/meetings', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
       },
-    ]);
+      body: JSON.stringify(meetingData)
+    });
+
+    if (res.ok) {
+      const newMeeting = await res.json();
+      setMeetings(current => [...current, { ...newMeeting, id: newMeeting._id }]);
+    }
   };
 
-  const handleDeleteMeeting = (meetingId: string) => {
-    setMeetings(current => current.filter(meeting => meeting.id !== meetingId));
+  const handleDeleteMeeting = async (meetingId: string) => {
+    console.log(`handleDeleteMeeting called with id: ${meetingId}`);
+    const res = await fetch(`http://localhost:5000/api/meetings/${meetingId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+
+    if (res.ok) {
+      setMeetings(current => current.filter(meeting => meeting.id !== meetingId));
+    }
   };
 
   // Sort meetings by date and time

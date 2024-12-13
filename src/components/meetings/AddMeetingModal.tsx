@@ -58,7 +58,7 @@ export const AddMeetingModal: React.FC<AddMeetingModalProps> = ({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <div className={`${
-        isDarkMode ? 'bg-gray-800' : 'bg-white'
+        isDarkMode ? 'bg-black bg-opacity-70 border border-gray-700 shadow-xl' : 'bg-white'
       } rounded-lg w-full max-w-md`}>
         <div className={`p-4 border-b ${
           isDarkMode ? 'border-gray-700' : 'border-gray-200'
@@ -87,7 +87,7 @@ export const AddMeetingModal: React.FC<AddMeetingModalProps> = ({
               onChange={(e) => setTitle(e.target.value)}
               className={`w-full rounded-md ${
                 isDarkMode 
-                  ? 'bg-gray-700 border-gray-600 text-gray-200' 
+                  ? 'bg-black bg-opacity-15 border border-gray-700 hover:bg-gray-700 text-gray-200' 
                   : 'border-gray-300 text-gray-900'
               } focus:ring-2 focus:ring-purple-500`}
               required
@@ -108,7 +108,7 @@ export const AddMeetingModal: React.FC<AddMeetingModalProps> = ({
                 onChange={(e) => setTime(e.target.value)}
                 className={`w-full rounded-md ${
                   isDarkMode 
-                    ? 'bg-gray-700 border-gray-600 text-gray-200' 
+                    ? 'bg-black bg-opacity-15 border border-gray-700 hover:bg-gray-700 text-gray-200' 
                     : 'border-gray-300 text-gray-900'
                 } focus:ring-2 focus:ring-purple-500`}
                 required
@@ -128,7 +128,7 @@ export const AddMeetingModal: React.FC<AddMeetingModalProps> = ({
                 onChange={(e) => setDate(e.target.value)}
                 className={`w-full rounded-md ${
                   isDarkMode 
-                    ? 'bg-gray-700 border-gray-600 text-gray-200' 
+                    ? 'bg-black bg-opacity-15 border border-gray-700 hover:bg-gray-700 text-gray-200' 
                     : 'border-gray-300 text-gray-900'
                 } focus:ring-2 focus:ring-purple-500`}
                 required
@@ -149,7 +149,7 @@ export const AddMeetingModal: React.FC<AddMeetingModalProps> = ({
               onChange={(e) => setPlace(e.target.value)}
               className={`w-full rounded-md ${
                 isDarkMode 
-                  ? 'bg-gray-700 border-gray-600 text-gray-200' 
+                  ? 'bg-black bg-opacity-15 border border-gray-700 hover:bg-gray-700 text-gray-200' 
                   : 'border-gray-300 text-gray-900'
               } focus:ring-2 focus:ring-purple-500`}
               required
@@ -169,7 +169,7 @@ export const AddMeetingModal: React.FC<AddMeetingModalProps> = ({
               onChange={(e) => setParticipants(e.target.value)}
               className={`w-full rounded-md ${
                 isDarkMode 
-                  ? 'bg-gray-700 border-gray-600 text-gray-200' 
+                  ? 'bg-black bg-opacity-15 border border-gray-700 hover:bg-gray-700 text-gray-200' 
                   : 'border-gray-300 text-gray-900'
               } focus:ring-2 focus:ring-purple-500`}
               required
@@ -188,7 +188,7 @@ export const AddMeetingModal: React.FC<AddMeetingModalProps> = ({
               onChange={(e) => setDescription(e.target.value)}
               className={`w-full rounded-md ${
                 isDarkMode 
-                  ? 'bg-gray-700 border-gray-600 text-gray-200' 
+                  ? 'bg-black bg-opacity-15 border border-gray-700 hover:bg-gray-700 text-gray-200' 
                   : 'border-gray-300 text-gray-900'
               } focus:ring-2 focus:ring-purple-500`}
               rows={3}

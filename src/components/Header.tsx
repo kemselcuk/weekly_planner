@@ -52,80 +52,84 @@ export const Header: React.FC = () => {
           </div>
           
           {/* Right Column: Nav Links with Border */}
-          <div className='pl-80'>
-          <div
-        className={`p-3 cursor-pointer border border-gray-800 rounded-lg shadow-lg w-12 ${
+          <div className="flex justify-end relative">
+            <div
+              className={`p-3 cursor-pointer border border-gray-800 rounded-lg shadow-lg w-12 ${
                 isDarkMode ? 'bg-black bg-opacity-15 hover:bg-gray-700' : 'hover:bg-gray-100'
               }`}
-        onClick={() => setMenuOpen(!menuOpen)}
-        onMouseEnter={() => setMenuOpen(true)} // Optional: Enable hover functionality
-        onMouseLeave={() => setMenuOpen(false)} // Optional: Close on hover out
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth="2"
-          stroke="currentColor"
-          className="w-6 h-6"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M3 12h18m-18 6h18m-18-12h18"
-          />
-        </svg>
-      </div>
+              onClick={() => setMenuOpen(!menuOpen)}
+              onMouseEnter={() => setMenuOpen(true)} // Optional: Enable hover functionality
+              onMouseLeave={() => setMenuOpen(false)} // Optional: Close on hover out
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="2"
+                stroke="currentColor"
+                className="w-6 h-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 12h18m-18 6h18m-18-12h18"
+                />
+              </svg>
+            </div>
 
-      {/* Dropdown Menu */}
-      {menuOpen && (
-        <nav
-          className="absolute right-0 mt-2 bg-white border shadow-lg rounded-lg p-4 space-y-2 dark:bg-gray-800 dark:border-gray-700"
-          onMouseEnter={() => setMenuOpen(true)} // Optional: Keep open on hover
-          onMouseLeave={() => setMenuOpen(false)} // Optional: Close on hover out
-        >
-          <Link
-            to="/user"
-            className={`block text-sm font-medium px-3 py-1 rounded hover:underline ${
-              isDarkMode ? 'text-white' : 'text-black'
-            }`}
-          >
-            Meetings
-          </Link>
-          <Link
-            to="/monthly-planner"
-            className={`block text-sm font-medium px-3 py-1 rounded hover:underline ${
-              isDarkMode ? 'text-white' : 'text-black'
-            }`}
-          >
-            Monthly Planner
-          </Link>
-          <Link
-            to="/pricing"
-            className={`block text-sm font-medium px-3 py-1 rounded hover:underline ${
-              isDarkMode ? 'text-white' : 'text-black'
-            }`}
-          >
-            Pricing
-          </Link>
-          <Link
-            to="/about-us"
-            className={`block text-sm font-medium px-3 py-1 rounded hover:underline ${
-              isDarkMode ? 'text-white' : 'text-black'
-            }`}
-          >
-            About Us
-          </Link>
-          <Link
-            to="/user"
-            className={`block text-sm font-medium px-3 py-1 rounded hover:underline ${
-              isDarkMode ? 'text-white' : 'text-black'
-            }`}
-          >
-            User
-          </Link>
-        </nav>)}
-        </div>
+            {/* Dropdown Menu */}
+            {menuOpen && (
+              <nav
+                className={`absolute right-0 mt-12 transform translate-x-1/2 border shadow-lg rounded-lg p-4 space-y-2 ${
+        isDarkMode ? 'bg-dark bg-opacity-90 border-gray-800' 
+          : 'bg-white/50 border-purple-100'
+      }`}
+                onMouseEnter={() => setMenuOpen(true)} // Optional: Keep open on hover
+                onMouseLeave={() => setMenuOpen(false)} // Optional: Close on hover out
+              >
+                <Link
+                  to="/meetings"
+                  className={`block text-sm font-medium px-3 py-1 rounded hover:underline ${
+                    isDarkMode ? 'text-white' : 'text-black'
+                  }`}
+                >
+                  Meetings
+                </Link>
+                <Link
+                  to="/monthly-planner"
+                  className={`block text-sm font-medium px-3 py-1 rounded hover:underline ${
+                    isDarkMode ? 'text-white' : 'text-black'
+                  }`}
+                >
+                  Monthly Planner
+                </Link>
+                <Link
+                  to="/pricing"
+                  className={`block text-sm font-medium px-3 py-1 rounded hover:underline ${
+                    isDarkMode ? 'text-white' : 'text-black'
+                  }`}
+                >
+                  Pricing
+                </Link>
+                <Link
+                  to="/about-us"
+                  className={`block text-sm font-medium px-3 py-1 rounded hover:underline ${
+                    isDarkMode ? 'text-white' : 'text-black'
+                  }`}
+                >
+                  About Us
+                </Link>
+                <Link
+                  to="/user"
+                  className={`block text-sm font-medium px-3 py-1 rounded hover:underline ${
+                    isDarkMode ? 'text-white' : 'text-black'
+                  }`}
+                >
+                  User
+                </Link>
+              </nav>
+            )}
+          </div>
         </div>
       </div>
     </header>

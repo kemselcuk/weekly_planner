@@ -23,7 +23,10 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({ meeting, onDelete }) =
           {meeting.title}
         </h3>
         <button
-          onClick={() => onDelete(meeting.id)}
+          onClick={() => {
+            console.log(`Deleting meeting with id: ${meeting.id}`);
+            onDelete(meeting.id);
+          }}
           className="text-gray-400 hover:text-gray-300"
         >
           ×
