@@ -6,12 +6,14 @@ interface WeeklyPlannerProps {
   weekPlan: WeekPlan;
   onAddNote: (date: string) => void;
   onDeleteNote: (date: string, noteId: string) => void;
+  onUpdateNoteStatus: (date: string, noteId: string, newStatus: 'pending' | 'in-progress' | 'completed') => void;
 }
 
 export const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({
   weekPlan,
   onAddNote,
   onDeleteNote,
+  onUpdateNoteStatus
 }) => {
   // Generate dates for the current week
   const getCurrentWeekDates = () => {
@@ -44,6 +46,7 @@ export const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({
           }}
           onAddNote={() => onAddNote(date)} // Modified: directly pass the date
           onDeleteNote={onDeleteNote}
+          onUpdateNoteStatus={onUpdateNoteStatus}
         />
       ))}
     </div>

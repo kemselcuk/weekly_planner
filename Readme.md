@@ -4,8 +4,10 @@
 - [ ] **Task**: Frontend de Meetinglerin temalarini duzelt 
 - [ ] **Task**: Frontendde menu iconundaki sorunlari coz +-
 - [ ] **Task**: Meeting i backende bagla +-
-- [ ] **Task**: Note larin daylarini duzelt
-- [ ] **Task**: notelara yapildi yapilmadi tik ozellegi ekle 
+- [ ] **Task**: Note larin daylarini duzelt ++
+- [ ] **Task**: notelara yapildi yapilmadi tik ozellegi ekle ++
+- [ ] **Task**: Monthly planner backende baglandi
+- [ ] **Task**: 
 - [ ] **Task**: Meetingler ana sayfada gozuksun
 - [ ] **Task**: 
 ---

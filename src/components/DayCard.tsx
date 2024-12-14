@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, CheckCircle2, Circle, Timer } from 'lucide-react';
 import { DayPlan } from '../types/planner';
 import { useTheme } from '../context/ThemeContext';
 
@@ -7,9 +7,15 @@ interface DayCardProps {
   day: DayPlan;
   onAddNote: (date: string) => void;
   onDeleteNote: (date: string, noteId: string) => void;
+  onUpdateNoteStatus: (date: string, noteId: string, newStatus: 'pending' | 'in-progress' | 'completed') => void;
 }
 
-export const DayCard: React.FC<DayCardProps> = ({ day, onAddNote, onDeleteNote }) => {
+export const DayCard: React.FC<DayCardProps> = ({ 
+  day, 
+  onAddNote, 
+  onDeleteNote,
+  onUpdateNoteStatus 
+}) => {
   const { isDarkMode } = useTheme();
 
   const formatDayAndDate = (dateStr: string) => {
@@ -23,6 +29,35 @@ export const DayCard: React.FC<DayCardProps> = ({ day, onAddNote, onDeleteNote }
   };
 
   const { dayName, fullDate, isToday } = formatDayAndDate(day.date);
+
+  const getStatusInfo = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return {
+          icon: <CheckCircle2 className="w-4 h-4" />,
+          color: 'text-green-500',
+          bgColor: isDarkMode ? 'bg-green-500/10' : 'bg-green-50'
+        };
+      case 'in-progress':
+        return {
+          icon: <Timer className="w-4 h-4" />,
+          color: 'text-yellow-500',
+          bgColor: isDarkMode ? 'bg-yellow-500/10' : 'bg-yellow-50'
+        };
+      default:
+        return {
+          icon: <Circle className="w-4 h-4" />,
+          color: 'text-gray-400',
+          bgColor: isDarkMode ? 'bg-gray-500/10' : 'bg-gray-50'
+        };
+    }
+  };
+
+  const getNextStatus = (currentStatus: string) => {
+    const statusOrder = ['pending', 'in-progress', 'completed'] as const;
+    const currentIndex = statusOrder.indexOf(currentStatus as any);
+    return statusOrder[(currentIndex + 1) % statusOrder.length];
+  };
 
   return (
     <div className={`${
@@ -64,21 +99,43 @@ export const DayCard: React.FC<DayCardProps> = ({ day, onAddNote, onDeleteNote }
             }`}
             style={{ borderLeftColor: note.color }}
           >
-            {note.time && (
-              <div className="text-xs font-medium mb-1" style={{ color: note.color }}>
-                {note.time}
+            <div className="flex flex-col gap-2">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  {note.time && (
+                    <div className="text-xs font-medium mb-1" style={{ color: note.color }}>
+                      {note.time}
+                    </div>
+                  )}
+                  <p className={isDarkMode ? 'text-gray-200' : 'text-gray-700'}>
+                    {note.content}
+                  </p>
+                </div>
+                <div className="flex items-start gap-2 ml-3">
+                  {note.status && (
+                    <button
+                      onClick={() => onUpdateNoteStatus(
+                        day.date, 
+                        note.id, 
+                        getNextStatus(note.status)
+                      )}
+                      className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium 
+                        ${getStatusInfo(note.status).bgColor} 
+                        ${getStatusInfo(note.status).color}
+                        hover:opacity-80 transition-opacity`}
+                    >
+                      {getStatusInfo(note.status).icon}
+                      <span className="capitalize">{note.status}</span>
+                    </button>
+                  )}
+                  <button
+                    onClick={() => onDeleteNote(day.date, note.id)}
+                    className="text-gray-400 hover:text-gray-300 text-lg leading-none"
+                  >
+                    ×
+                  </button>
+                </div>
               </div>
-            )}
-            <div className="flex justify-between items-start gap-2">
-              <p className={isDarkMode ? 'text-gray-200' : 'text-gray-700'}>
-                {note.content}
-              </p>
-              <button
-                onClick={() => onDeleteNote(day.date, note.id)}
-                className="text-gray-400 hover:text-gray-300 text-xs"
-              >
-                ×
-              </button>
             </div>
           </div>
         ))}

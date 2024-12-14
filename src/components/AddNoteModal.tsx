@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { X, Clock, Calendar } from 'lucide-react'; // Import Calendar icon
 import { useTheme } from '../context/ThemeContext';
+import { StatusSelector } from './StatusSelector';
 
 interface AddNoteModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddNote: (date: string, content: string, time?: string) => void;
+  onAddNote: (date: string, content: string, time?: string, status?: 'pending' | 'in-progress' | 'completed') => void;
   selectedDay?: string;
 }
 
@@ -20,6 +21,7 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
   const [content, setContent] = useState('');
   const [time, setTime] = useState('');
   const [date, setDate] = useState('');
+  const [status, setStatus] = useState<'pending' | 'in-progress' | 'completed'>('pending');
 
   // Reset form when modal opens/closes
   useEffect(() => {
@@ -29,15 +31,17 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
       setContent('');
       setTime('');
       setDate('');
+      setStatus('pending');
     }
   }, [isOpen, selectedDay]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (content.trim() && date) {
-      onAddNote(date, content, time);
+      onAddNote(date, content, time, status);
       setContent('');
       setTime('');
+      setStatus('pending');
       onClose();
     }
   };
@@ -132,6 +136,18 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
               }`}
               rows={4}
               required
+            />
+          </div>
+          <div>
+            <label className={`block text-sm font-medium ${
+              isDarkMode ? 'text-gray-300' : 'text-gray-700'
+            } mb-2`}>
+              Status
+            </label>
+            <StatusSelector
+              status={status}
+              onChange={setStatus}
+              isDarkMode={isDarkMode}
             />
           </div>
           <div className="flex justify-end">

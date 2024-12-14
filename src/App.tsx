@@ -68,6 +68,7 @@ function AppContent() {
             id: n._id,
             content: n.content,
             time: n.time,
+            status: n.status || 'pending', // Add this line
             color: n.color || (isDarkMode ? '#a855f7' : '#8B5CF6')
           }))
       }));
@@ -78,12 +79,18 @@ function AppContent() {
     fetchNotes();
   }, [token, isDarkMode]);
 
-  const handleAddNote = async (date: string, content: string, time?: string) => {
+  const handleAddNote = async (
+    date: string, 
+    content: string, 
+    time?: string, 
+    status: 'pending' | 'in-progress' | 'completed' = 'pending'
+  ) => {
     if (!token) return;
     const body = { 
       date,
       content,
-      time
+      time,
+      status
     };
     console.log('Sending note data:', body); // Add this line to debug
     const res = await fetch('http://localhost:5000/api/notes', {
@@ -102,7 +109,7 @@ function AppContent() {
     }
     const newNote = await res.json();
 
-    // Update state
+    // Update state with status included
     setWeekPlan((currentPlan) =>
       currentPlan.map((dayPlan) =>
         dayPlan.date === date
@@ -114,6 +121,7 @@ function AppContent() {
                   id: newNote._id,
                   content: newNote.content,
                   time: newNote.time,
+                  status: newNote.status, // Add this line
                   color: newNote.color || (isDarkMode ? '#a855f7' : '#8B5CF6')
                 },
               ],
@@ -149,6 +157,56 @@ function AppContent() {
     );
   };
 
+  const handleUpdateNoteStatus = async (
+    date: string,
+    noteId: string,
+    newStatus: 'pending' | 'in-progress' | 'completed'
+  ) => {
+    if (!token) return;
+    
+    try {
+      const res = await fetch(`http://localhost:5000/api/notes/${noteId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+  
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error('Error updating status:', errorData);
+        alert('Error updating note status');
+        return;
+      }
+  
+      const updatedNote = await res.json();
+  
+      // Update state locally only after successful backend update
+      setWeekPlan((currentPlan) =>
+        currentPlan.map((dayPlan) =>
+          dayPlan.date === date
+            ? {
+                ...dayPlan,
+                notes: dayPlan.notes.map((note) =>
+                  note.id === noteId
+                    ? { 
+                        ...note, 
+                        status: updatedNote.status // Use the status from the server response
+                      }
+                    : note
+                ),
+              }
+            : dayPlan
+        )
+      );
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error updating note status');
+    }
+  };
+
   // If not authenticated, redirect all protected routes to /login
   return (
     <div className={`min-h-screen ${
@@ -172,6 +230,7 @@ function AppContent() {
                       setIsAddNoteOpen(true);
                     }}
                     onDeleteNote={handleDeleteNote}
+                    onUpdateNoteStatus={handleUpdateNoteStatus}
                   />
                 } 
               />

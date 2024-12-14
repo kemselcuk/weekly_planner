@@ -82,12 +82,20 @@ router.get('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
 // UPDATE a note by ID (user must own the note)
 router.put('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
   const { id } = req.params;
-  const { date, content, time, color } = req.body;
+  const { date, content, time, color, status } = req.body;
 
   try {
+    // Only update the fields that are provided
+    const updateData: any = {};
+    if (date) updateData.date = date;
+    if (content) updateData.content = content;
+    if (time !== undefined) updateData.time = time;
+    if (color !== undefined) updateData.color = color;
+    if (status) updateData.status = status;
+
     const updatedNote = await Note.findOneAndUpdate(
       { _id: id, user: req.user?._id },
-      { date, content, time, color },
+      updateData,
       { new: true }
     );
 
