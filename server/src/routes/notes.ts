@@ -13,17 +13,23 @@ router.use(authMiddleware);
 
 // CREATE a Note (for the logged-in user)
 router.post('/', async (req: AuthRequest, res: Response): Promise<void> => {
-  const { day, content, time, color } = req.body;
+  const { date, content, time, color } = req.body;
   
-  if (!day || !content) {
-    res.status(400).json({ message: 'day and content are required' });
+  console.log('Received note data:', req.body); // Add this line to debug
+
+  if (!date || !content) {
+    console.log('Validation failed:', { date, content }); // Add this line to debug
+    res.status(400).json({ 
+      message: 'date and content are required',
+      received: { date, content } 
+    });
     return; // end function after sending response
   }
 
   try {
     const note = await Note.create({ 
       user: req.user?._id,
-      day, 
+      date, 
       content, 
       time, 
       color 
@@ -31,17 +37,22 @@ router.post('/', async (req: AuthRequest, res: Response): Promise<void> => {
     res.status(201).json(note);
     // No return needed here, the function ends after sending response
   } catch (err: any) {
-    res.status(500).json({ message: 'Error creating note', error: err.message });
+    console.error('Database error:', err); // Add this line to debug
+    res.status(500).json({ 
+      message: 'Error creating note', 
+      error: err.message,
+      details: err 
+    });
   }
 });
 
-// READ all notes belonging to the logged-in user (optional day filter)
+// READ all notes belonging to the logged-in user (optional date filter)
 router.get('/', async (req: AuthRequest, res: Response): Promise<void> => {
-  const { day } = req.query;
+  const { date } = req.query;
   const query: Record<string, any> = { user: req.user?._id };
 
-  if (day) {
-    query.day = Number(day);
+  if (date) {
+    query.date = date;
   }
 
   try {
@@ -71,12 +82,12 @@ router.get('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
 // UPDATE a note by ID (user must own the note)
 router.put('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
   const { id } = req.params;
-  const { day, content, time, color } = req.body;
+  const { date, content, time, color } = req.body;
 
   try {
     const updatedNote = await Note.findOneAndUpdate(
       { _id: id, user: req.user?._id },
-      { day, content, time, color },
+      { date, content, time, color },
       { new: true }
     );
 

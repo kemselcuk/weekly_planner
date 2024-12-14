@@ -41,27 +41,35 @@ function AppContent() {
         }
       });
       if (!res.ok) {
-        // If fetching notes fails (e.g., invalid token), log the user out
         handleLogout();
         return;
       }
-      const notes = await res.json(); 
+      const notes = await res.json();
       
+      // Get current week dates
+      const today = new Date();
+      const currentDay = today.getDay();
+      const diff = currentDay === 0 ? 6 : currentDay - 1;
+      const monday = new Date(today);
+      monday.setDate(today.getDate() - diff);
+      
+      const weekDates = Array.from({ length: 7 }, (_, i) => {
+        const date = new Date(monday);
+        date.setDate(monday.getDate() + i);
+        return date.toISOString().split('T')[0];
+      });
+
       // Transform backend notes into a WeekPlan structure
-      const daysOfWeek = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
-      
-      const newWeekPlan: WeekPlan = daysOfWeek.map(day => ({
-        day: day,
-        notes: notes.filter((n: any) => {
-          // Adjust this logic if your backend's day field is a string rather than a number
-          // If your backend returns day as a number (1=Monday), this maps correctly
-          return n.day === daysOfWeek.indexOf(day) + 1;
-        }).map((n: any) => ({
-          id: n._id,
-          content: n.content,
-          time: n.time,
-          color: n.color || (isDarkMode ? '#a855f7' : '#8B5CF6')
-        }))
+      const newWeekPlan: WeekPlan = weekDates.map(date => ({
+        date,
+        notes: notes
+          .filter((n: any) => n.date === date)
+          .map((n: any) => ({
+            id: n._id,
+            content: n.content,
+            time: n.time,
+            color: n.color || (isDarkMode ? '#a855f7' : '#8B5CF6')
+          }))
       }));
 
       setWeekPlan(newWeekPlan);
@@ -70,13 +78,14 @@ function AppContent() {
     fetchNotes();
   }, [token, isDarkMode]);
 
-  const handleAddNote = async (day: string, content: string, time?: string) => {
+  const handleAddNote = async (date: string, content: string, time?: string) => {
     if (!token) return;
     const body = { 
-      day: (["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"].indexOf(day)+1),
+      date,
       content,
       time
     };
+    console.log('Sending note data:', body); // Add this line to debug
     const res = await fetch('http://localhost:5000/api/notes', {
       method: 'POST',
       headers: {
@@ -86,6 +95,8 @@ function AppContent() {
       body: JSON.stringify(body)
     });
     if (!res.ok) {
+      const errorData = await res.json(); // Add this line to see the error
+      console.error('Error response:', errorData); // Add this line to debug
       alert('Error adding note');
       return;
     }
@@ -94,7 +105,7 @@ function AppContent() {
     // Update state
     setWeekPlan((currentPlan) =>
       currentPlan.map((dayPlan) =>
-        dayPlan.day === day
+        dayPlan.date === date
           ? {
               ...dayPlan,
               notes: [
@@ -112,7 +123,7 @@ function AppContent() {
     );
   };
 
-  const handleDeleteNote = async (day: string, noteId: string) => {
+  const handleDeleteNote = async (date: string, noteId: string) => {
     if (!token) return;
     const res = await fetch(`http://localhost:5000/api/notes/${noteId}`, {
       method: 'DELETE',
@@ -128,7 +139,7 @@ function AppContent() {
     // Update state
     setWeekPlan((currentPlan) =>
       currentPlan.map((dayPlan) =>
-        dayPlan.day === day
+        dayPlan.date === date
           ? {
               ...dayPlan,
               notes: dayPlan.notes.filter((note) => note.id !== noteId),
@@ -155,8 +166,9 @@ function AppContent() {
                 element={
                   <WeeklyPlanner
                     weekPlan={weekPlan}
-                    onAddNote={(day) => {
-                      setSelectedDay(day);
+                    onAddNote={(date) => {
+                      console.log('Selected date:', date); // Add this debug log
+                      setSelectedDay(date);
                       setIsAddNoteOpen(true);
                     }}
                     onDeleteNote={handleDeleteNote}
@@ -200,7 +212,10 @@ function AppContent() {
           />
           <AddNoteModal
             isOpen={isAddNoteOpen}
-            onClose={() => setIsAddNoteOpen(false)}
+            onClose={() => {
+              setIsAddNoteOpen(false);
+              setSelectedDay(undefined); // Reset selectedDay when closing
+            }}
             onAddNote={handleAddNote}
             selectedDay={selectedDay}
           />

@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { X, Clock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Clock, Calendar } from 'lucide-react'; // Import Calendar icon
 import { useTheme } from '../context/ThemeContext';
 
 interface AddNoteModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddNote: (day: string, content: string, time?: string) => void;
+  onAddNote: (date: string, content: string, time?: string) => void;
   selectedDay?: string;
 }
 
@@ -19,12 +19,23 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
   
   const [content, setContent] = useState('');
   const [time, setTime] = useState('');
-  const [day, setDay] = useState(selectedDay || '');
+  const [date, setDate] = useState('');
+
+  // Reset form when modal opens/closes
+  useEffect(() => {
+    if (isOpen && selectedDay) {
+      setDate(selectedDay);
+    } else {
+      setContent('');
+      setTime('');
+      setDate('');
+    }
+  }, [isOpen, selectedDay]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (content.trim() && day) {
-      onAddNote(day, content, time);
+    if (content.trim() && date) {
+      onAddNote(date, content, time);
       setContent('');
       setTime('');
       onClose();
@@ -51,32 +62,42 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
         </div>
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           <div>
-            <label htmlFor="day" className="block text-sm font-medium mb-1">
-              Day
+            <label htmlFor="date" className={`block text-sm font-medium ${
+              isDarkMode ? 'text-gray-300' : 'text-gray-700'
+            } mb-1`}>
+              Date
             </label>
-            <select
-              id="day"
-              value={day}
-              onChange={(e) => setDay(e.target.value)}
-              className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                isDarkMode 
-                  ? 'bg-black border-gray-600 text-gray-100'
-                  : 'border-gray-300  text-gray-900 bg-white'
-              }`}
-              required
-            >
-              <option value="">Select a day</option>
-              <option value="Monday">Monday</option>
-              <option value="Tuesday">Tuesday</option>
-              <option value="Wednesday">Wednesday</option>
-              <option value="Thursday">Thursday</option>
-              <option value="Friday">Friday</option>
-              <option value="Saturday">Saturday</option>
-              <option value="Sunday">Sunday</option>
-            </select>
+            <div className="relative">
+              <div 
+                onClick={() => {
+                  document.getElementById('date')?.showPicker();
+                }}
+                className="absolute inset-y-0 left-0 flex items-center pl-3 cursor-pointer w-10 h-full"
+              >
+                <Calendar className="w-5 h-5 text-gray-400" />
+              </div>
+              <input
+                type="date"
+                id="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                onClick={(e) => {
+                  // This ensures the native date picker opens
+                  (e.target as HTMLInputElement).showPicker();
+                }}
+                className={`w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                  isDarkMode 
+                    ? 'bg-black border-gray-600 text-gray-100'
+                    : 'border-gray-300  text-gray-900 bg-white'
+                }`}
+                required
+              />
+            </div>
           </div>
           <div>
-            <label htmlFor="time" className="block text-sm font-medium mb-1">
+            <label htmlFor="time" className={`block text-sm font-medium ${
+              isDarkMode ? 'text-gray-300' : 'text-gray-700'
+            } mb-1`}>
               Time (optional)
             </label>
             <div className="relative">
@@ -95,7 +116,9 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
             </div>
           </div>
           <div>
-            <label htmlFor="content" className="block text-sm font-medium mb-1">
+            <label htmlFor="content" className={`block text-sm font-medium ${
+              isDarkMode ? 'text-gray-300' : 'text-gray-700'
+            } mb-1`}>
               Note
             </label>
             <textarea

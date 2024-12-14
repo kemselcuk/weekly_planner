@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface INote extends Document {
   user: mongoose.Types.ObjectId;
-  day: number;              // or string if you prefer days as strings
+  date: string;             // Changed from day to date
   content: string;
   time?: string;
   color?: string;
@@ -13,7 +13,7 @@ export interface INote extends Document {
 const NoteSchema = new Schema<INote>(
   {
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    day: { type: Number, required: true },
+    date: { type: String, required: true }, // Changed from day to date
     content: { type: String, required: true },
     time: { type: String },
     color: { type: String },
