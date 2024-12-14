@@ -4,12 +4,16 @@ import { MonthlyNotesModal } from '../components/MonthlyNotesModal';
 import { Note } from '../types/planner';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const MonthlyPlanner: React.FC = () => {
-  const { isDarkMode } = useTheme();
+interface MonthlyPlannerProps {
+  token: string;
+  isDarkMode: boolean;
+  onNoteAdded: () => void;
+}
+
+const MonthlyPlanner: React.FC<MonthlyPlannerProps> = ({ token, isDarkMode, onNoteAdded }) => {
   const [monthNotes, setMonthNotes] = useState<Record<string, Note[]>>({});
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [token] = useState<string | null>(localStorage.getItem('token'));
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const changeMonth = (delta: number) => {
@@ -148,6 +152,9 @@ const MonthlyPlanner: React.FC = () => {
           }
         ]
       }));
+
+      // Call the callback to update WeeklyPlanner
+      onNoteAdded();
     } catch (error) {
       console.error('Error adding note:', error);
     }

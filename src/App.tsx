@@ -15,6 +15,7 @@ import UserInfo from './pages/UserInfo'; // Ensure correct path to UserInfo comp
 import Login from './components/Login'; // If you have a login page
 import SignIn from './pages/SignIn'; // If you have a sign-in page
 import MeetingsPage  from './pages/MeetingsPage';
+import './styles/layout.css';
 
 function AppContent() {
   const { isDarkMode } = useTheme();
@@ -31,52 +32,53 @@ function AppContent() {
     setToken(null);
   };
 
-  // Fetch notes from backend on mount/update
-  useEffect(() => {
-    const fetchNotes = async () => {
-      if (!token) return;
-      const res = await fetch('http://localhost:5000/api/notes', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (!res.ok) {
-        handleLogout();
-        return;
+  // Add a function to fetch and update notes
+  const fetchAndUpdateNotes = async () => {
+    if (!token) return;
+    const res = await fetch('http://localhost:5000/api/notes', {
+      headers: {
+        'Authorization': `Bearer ${token}`
       }
-      const notes = await res.json();
-      
-      // Get current week dates
-      const today = new Date();
-      const currentDay = today.getDay();
-      const diff = currentDay === 0 ? 6 : currentDay - 1;
-      const monday = new Date(today);
-      monday.setDate(today.getDate() - diff);
-      
-      const weekDates = Array.from({ length: 7 }, (_, i) => {
-        const date = new Date(monday);
-        date.setDate(monday.getDate() + i);
-        return date.toISOString().split('T')[0];
-      });
+    });
+    if (!res.ok) {
+      handleLogout();
+      return;
+    }
+    const notes = await res.json();
+    
+    // Get current week dates
+    const today = new Date();
+    const currentDay = today.getDay();
+    const diff = currentDay === 0 ? 6 : currentDay - 1;
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - diff);
+    
+    const weekDates = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date(monday);
+      date.setDate(monday.getDate() + i);
+      return date.toISOString().split('T')[0];
+    });
 
-      // Transform backend notes into a WeekPlan structure
-      const newWeekPlan: WeekPlan = weekDates.map(date => ({
-        date,
-        notes: notes
-          .filter((n: any) => n.date === date)
-          .map((n: any) => ({
-            id: n._id,
-            content: n.content,
-            time: n.time,
-            status: n.status || 'pending', // Add this line
-            color: n.color || (isDarkMode ? '#a855f7' : '#8B5CF6')
-          }))
-      }));
+    // Transform backend notes into a WeekPlan structure
+    const newWeekPlan: WeekPlan = weekDates.map(date => ({
+      date,
+      notes: notes
+        .filter((n: any) => n.date === date)
+        .map((n: any) => ({
+          id: n._id,
+          content: n.content,
+          time: n.time,
+          status: n.status || 'pending',
+          color: n.color || (isDarkMode ? '#a855f7' : '#8B5CF6')
+        }))
+    }));
 
-      setWeekPlan(newWeekPlan);
-    };
+    setWeekPlan(newWeekPlan);
+  };
 
-    fetchNotes();
+  // Update the useEffect to use the new function
+  useEffect(() => {
+    fetchAndUpdateNotes();
   }, [token, isDarkMode]);
 
   const handleAddNote = async (
@@ -207,15 +209,57 @@ function AppContent() {
     }
   };
 
+  const handleUpdateNoteContent = async (date: string, noteId: string, newContent: string) => {
+    if (!token) return;
+    
+    console.log('Updating note content:', { date, noteId, newContent }); // Debug log
+    
+    try {
+      const res = await fetch(`http://localhost:5000/api/notes/${noteId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ content: newContent })
+      });
+  
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error('Error updating note:', errorData); // Debug log
+        alert('Error updating note content');
+        return;
+      }
+  
+      const updatedNote = await res.json();
+      console.log('Note updated successfully:', updatedNote); // Debug log
+  
+      setWeekPlan((currentPlan) =>
+        currentPlan.map((dayPlan) =>
+          dayPlan.date === date
+            ? {
+                ...dayPlan,
+                notes: dayPlan.notes.map((note) =>
+                  note.id === noteId ? { ...note, content: updatedNote.content } : note
+                ),
+              }
+            : dayPlan
+        )
+      );
+  
+      // Fetch updated notes to ensure consistency
+      await fetchAndUpdateNotes();
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error updating note content');
+    }
+  };
+
   // If not authenticated, redirect all protected routes to /login
   return (
-    <div className={`min-h-screen ${
-      isDarkMode 
-        ? 'bg-slate-950 text-gray-100' 
-        : 'bg-gradient-to-b from-purple-50 to-white text-gray-900'
-    }`}>
+    <div className={`min-h-screen ${isDarkMode ? 'bg-slate-950 text-gray-100' : 'bg-gradient-to-b from-purple-50 to-white text-gray-900'}`}>
       <Header />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
+      <main className="pt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
         <Routes>
           {token ? (
             <>
@@ -225,17 +269,26 @@ function AppContent() {
                   <WeeklyPlanner
                     weekPlan={weekPlan}
                     onAddNote={(date) => {
-                      console.log('Selected date:', date); // Add this debug log
                       setSelectedDay(date);
                       setIsAddNoteOpen(true);
                     }}
                     onDeleteNote={handleDeleteNote}
                     onUpdateNoteStatus={handleUpdateNoteStatus}
+                    onUpdateNoteContent={handleUpdateNoteContent}  // Make sure this is passed
                   />
                 } 
               />
               <Route path="/meetings" element={<MeetingsPage />} />
-              <Route path="/monthly-planner" element={<MonthlyPlanner />} />
+              <Route 
+                path="/monthly-planner" 
+                element={
+                  <MonthlyPlanner 
+                    token={token} 
+                    isDarkMode={isDarkMode}
+                    onNoteAdded={fetchAndUpdateNotes}
+                  />
+                } 
+              />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/about-us" element={<AboutUs />} />
               <Route path="/user" element={<UserInfo token={token} onLogout={handleLogout} />} />
@@ -252,34 +305,35 @@ function AppContent() {
             </>
           )}
         </Routes>
+        
+        {token && (
+          <>
+            <FloatingNav
+              onOpenSearch={() => setIsSearchOpen(true)}
+              onOpenAddNote={() => setIsAddNoteOpen(true)}
+              onOpenSettings={() => setIsSettingsOpen(true)}
+            />
+            <SearchModal
+              isOpen={isSearchOpen}
+              onClose={() => setIsSearchOpen(false)}
+              weekPlan={weekPlan}
+            />
+            <SettingsModal
+              isOpen={isSettingsOpen}
+              onClose={() => setIsSettingsOpen(false)}
+            />
+            <AddNoteModal
+              isOpen={isAddNoteOpen}
+              onClose={() => {
+                setIsAddNoteOpen(false);
+                setSelectedDay(undefined); // Reset selectedDay when closing
+              }}
+              onAddNote={handleAddNote}
+              selectedDay={selectedDay}
+            />
+          </>
+        )}
       </main>
-      {token && (
-        <>
-          <FloatingNav
-            onOpenSearch={() => setIsSearchOpen(true)}
-            onOpenAddNote={() => setIsAddNoteOpen(true)}
-            onOpenSettings={() => setIsSettingsOpen(true)}
-          />
-          <SearchModal
-            isOpen={isSearchOpen}
-            onClose={() => setIsSearchOpen(false)}
-            weekPlan={weekPlan}
-          />
-          <SettingsModal
-            isOpen={isSettingsOpen}
-            onClose={() => setIsSettingsOpen(false)}
-          />
-          <AddNoteModal
-            isOpen={isAddNoteOpen}
-            onClose={() => {
-              setIsAddNoteOpen(false);
-              setSelectedDay(undefined); // Reset selectedDay when closing
-            }}
-            onAddNote={handleAddNote}
-            selectedDay={selectedDay}
-          />
-        </>
-      )}
     </div>
   );
 }

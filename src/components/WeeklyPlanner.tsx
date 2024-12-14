@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { DayCard } from './DayCard';
 import { WeekPlan } from '../types/planner';
 
@@ -7,14 +7,26 @@ interface WeeklyPlannerProps {
   onAddNote: (date: string) => void;
   onDeleteNote: (date: string, noteId: string) => void;
   onUpdateNoteStatus: (date: string, noteId: string, newStatus: 'pending' | 'in-progress' | 'completed') => void;
+  onUpdateNoteContent: (date: string, noteId: string, newContent: string) => void;
 }
 
 export const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({
   weekPlan,
   onAddNote,
   onDeleteNote,
-  onUpdateNoteStatus
+  onUpdateNoteStatus,
+  onUpdateNoteContent  // Make sure this prop is included
 }) => {
+  const [expandedDays, setExpandedDays] = useState<string[]>([]);
+  
+  const toggleDay = (date: string) => {
+    setExpandedDays(prev => 
+      prev.includes(date) 
+        ? prev.filter(d => d !== date)
+        : [...prev, date]
+    );
+  };
+
   // Generate dates for the current week
   const getCurrentWeekDates = () => {
     const dates = [];
@@ -38,16 +50,20 @@ export const WeeklyPlanner: React.FC<WeeklyPlannerProps> = ({
   return (
     <div className="max-w-3xl mx-auto space-y-4">
       {weekDates.map((date) => (
-        <DayCard
-          key={date}
-          day={{
-            date: date, // Make sure this is the exact date string
-            notes: weekPlan.find(d => d.date === date)?.notes || []
-          }}
-          onAddNote={() => onAddNote(date)} // Modified: directly pass the date
-          onDeleteNote={onDeleteNote}
-          onUpdateNoteStatus={onUpdateNoteStatus}
-        />
+        <div key={date} className="relative">
+          <DayCard
+            day={{
+              date: date, // Make sure this is the exact date string
+              notes: weekPlan.find(d => d.date === date)?.notes || []
+            }}
+            onAddNote={() => onAddNote(date)} // Modified: directly pass the date
+            onDeleteNote={onDeleteNote}
+            onUpdateNoteStatus={onUpdateNoteStatus}
+            onUpdateNoteContent={onUpdateNoteContent}  // Make sure this prop is passed
+            isExpanded={expandedDays.includes(date)}
+            onToggleExpand={() => toggleDay(date)}
+          />
+        </div>
       ))}
     </div>
   );

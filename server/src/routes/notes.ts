@@ -84,6 +84,8 @@ router.put('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
   const { id } = req.params;
   const { date, content, time, color, status } = req.body;
 
+  console.log('Updating note:', { id, body: req.body }); // Debug log
+
   try {
     // Only update the fields that are provided
     const updateData: any = {};
@@ -93,6 +95,8 @@ router.put('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
     if (color !== undefined) updateData.color = color;
     if (status) updateData.status = status;
 
+    console.log('Update data:', updateData); // Debug log
+
     const updatedNote = await Note.findOneAndUpdate(
       { _id: id, user: req.user?._id },
       updateData,
@@ -100,12 +104,15 @@ router.put('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
     );
 
     if (!updatedNote) {
+      console.log('Note not found:', { id, userId: req.user?._id }); // Debug log
       res.status(404).json({ message: 'Note not found or not owned by user' });
       return;
     }
 
+    console.log('Note updated successfully:', updatedNote); // Debug log
     res.json(updatedNote);
   } catch (err: any) {
+    console.error('Error updating note:', err); // Debug log
     res.status(500).json({ message: 'Error updating the note', error: err.message });
   }
 });
